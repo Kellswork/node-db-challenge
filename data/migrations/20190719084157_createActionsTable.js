@@ -4,6 +4,14 @@ exports.up = function(knex) {
         table.text('description').notNullable();
         table.text('notes').notNullable();
       table.boolean('completed').defaultTo(false);
+      table
+      .integer('project_id')
+      .unsigned()
+      .notNullable()
+      .references('id')
+      .inTable('projects')
+      .onUpdate('CASCADE')
+      .onDelete('CASCADE');
     });
   };
   
