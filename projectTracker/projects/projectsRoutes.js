@@ -1,6 +1,14 @@
 const express = require('express');
-const { getProjects, addProject, getProjectId } = require('./projectsModels');
-const {validateProject, validateProjectId} = require('./projectsValidator');
+const {
+  getProjects,
+  addProject,
+  getProjectId,
+  getProjectActions
+} = require('./projectsModels');
+const { validateProject, validateProjectId } = require('./projectsValidator');
+const validateAction = require('../actions/actionsValidator');
+const { addAction } = require('../actions/actionsModels');
+
 const router = express.Router();
 module.exports = router;
 
@@ -36,7 +44,6 @@ router.get('/:id', validateProjectId, async (req, res) => {
   }
 });
 
-
 router.post('/', validateProject, async (req, res) => {
   try {
     const completed = req.body.completed === 1 ? 'true' : 'false';
@@ -49,4 +56,29 @@ router.post('/', validateProject, async (req, res) => {
   }
 });
 
+router.post('/:id/actions', validateAction, async (req, res) => {
+  try {
+    const completed = req.body.completed === 1 ? 'true' : 'false';
+    const action = await addAction({
+      ...req.body,
+      completed,
+      project_id: req.params.id
+    });
+    return res.status(201).json(action);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: 'could not save action to the database' });
+  }
+});
 
+router.get('/:id/actions', validateProjectId, async (req, res) => {
+  try {
+    const projectAction = await getProjectActions(req.params.id);
+    return res.status(200).json(projectAction);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: 'could not get actions for this project' });
+  }
+});
