@@ -21,8 +21,12 @@ function addProject(project) {
     .then(ids => getProjectId(ids[0]));
 }
 
-function getProjectActions(id) {
-  return db('actions')
-    .join('projects', 'actions.project_id', 'projects.id')
-    .where({ project_id: id });
+function projectAction(id) {
+return db('actions').select('id', 'description', 'notes', 'completed').where('project_id', id )
+}
+
+async function getProjectActions(id) {
+  const project = await getProjectId(id).first();
+  project.action = await projectAction(project.id);
+  return project;
 }
